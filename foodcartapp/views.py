@@ -1,5 +1,3 @@
-import json
-
 from django.http import JsonResponse
 from django.templatetags.static import static
 
@@ -64,10 +62,44 @@ def product_list_api(request):
 
 
 def is_error(data):
+    fields = [
+        'firstname',
+        'lastname',
+        'phonenumber',
+        'address',
+    ]
+    for field in fields:
+        if field not in data:
+            return {
+                'error': f'{field}: Обязательное поле.'
+            }
+        if not data[field]:
+            return {
+                'error': f'{field}: Это поле не может быть пустым.'
+            }
+        if isinstance(data[field], list):
+            return {
+                'error': f'{field}: Это поле не может быть списком.'
+            }
     if 'products' not in data or not data['products'] or not isinstance(data['products'], list):
         return {
              'error': 'products key are not presented or not list'
          }
+    try:
+        for item in data['products']:
+            id = item['product']
+            product = Product.objects.get(id=id)
+    except Product.DoesNotExist:
+        return {
+             'error': f'products: Недопустимый первичный ключ {id}'
+         }
+    
+    phonenumber = (data['phonenumber']).lstrip('+')
+    if phonenumber[:2] not in ['89', '79']:
+        return {
+             'error': f'phonenumber: Введен некорректный номер телефона: {phonenumber[:2]}.'
+         }
+
     return {}
 
 
@@ -75,7 +107,6 @@ def is_error(data):
 def register_order(request):
     try:
         data = request.data
-        print(data)
         error = is_error(data)
         if error:
             return Response(error, status=status.HTTP_404_NOT_FOUND)
@@ -91,7 +122,7 @@ def register_order(request):
                 product=Product.objects.get(id=item['product']),
                 quantity=item['quantity'],
             )
-        
+     
         return Response({}, status=status.HTTP_200_OK)
     except ValueError:
         return Response({
