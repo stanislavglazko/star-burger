@@ -3,6 +3,7 @@ import json
 from django.http import JsonResponse
 from django.templatetags.static import static
 
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -62,11 +63,22 @@ def product_list_api(request):
     })
 
 
+def is_error(data):
+    if 'products' not in data or not data['products'] or not isinstance(data['products'], list):
+        return {
+             'error': 'products key are not presented or not list'
+         }
+    return {}
+
+
 @api_view(['POST'])
 def register_order(request):
     try:
         data = request.data
         print(data)
+        error = is_error(data)
+        if error:
+            return Response(error, status=status.HTTP_404_NOT_FOUND)
         order = Order()
         order.customer_name = data['firstname']
         order.customer_last_name = data['lastname']
@@ -80,7 +92,7 @@ def register_order(request):
                 quantity=item['quantity'],
             )
         
-        return Response({})
+        return Response({}, status=status.HTTP_200_OK)
     except ValueError:
         return Response({
             'error': 'Некорректные данные',
