@@ -17,6 +17,7 @@ class RestaurantMenuItemInline(admin.TabularInline):
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
+    verbose_name_plural = 'Позиции в заказе'
     extra = 0
 
 
