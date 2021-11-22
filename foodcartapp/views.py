@@ -99,9 +99,7 @@ def register_order(request):
             quantity=item['quantity'],
             cost=item['product'].price * item['quantity'],
         )
-    
-    0/0
-    
+
     serializer = OrderSerializer(order)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
