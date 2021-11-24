@@ -129,15 +129,23 @@ class RestaurantMenuItem(models.Model):
 class OrderQuerySet(models.QuerySet):
 
     def get_cost(self):
-        cost_of_order = Order.objects.annotate(cost_of_order=Sum(F('products__cost')))
+        cost_of_order = Order.objects.filter(status='OPEN').annotate(cost_of_order=Sum(F('products__cost')))
         return cost_of_order
 
 
 class Order(models.Model):
+    OPEN = 'OPEN'
+    CLOSED = 'CLOSED'
+
+    STATUSES = [
+        (OPEN, 'Необработанный'),
+        (CLOSED, 'Обработанный'),
+    ]
     firstname = models.CharField('Имя', max_length=200)
     lastname = models.CharField('Фамилия', max_length=200)
     phonenumber = PhoneNumberField()
     address = models.CharField('Адрес', max_length=200)
+    status = models.CharField('Статус', max_length=200, choices=STATUSES, default=OPEN)
     objects = OrderQuerySet.as_manager()
 
     class Meta:
