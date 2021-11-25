@@ -146,6 +146,7 @@ class Order(models.Model):
     phonenumber = PhoneNumberField()
     address = models.CharField('Адрес', max_length=200)
     status = models.CharField('Статус', max_length=200, choices=STATUSES, default=OPEN)
+    comment = models.TextField('Комментарий', default='', blank=True)
     objects = OrderQuerySet.as_manager()
 
     class Meta:
