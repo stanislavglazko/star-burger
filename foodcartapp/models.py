@@ -142,21 +142,38 @@ class Order(models.Model):
         (OPEN, 'Необработанный'),
         (CLOSED, 'Обработанный'),
     ]
+    OFFLINE = 'OFFLINE'
+    ONLINE = 'ONLINE'
+    PAYMENT_METHODS = [
+        (OFFLINE, 'Наличными'),
+        (ONLINE,  'Онлайн'),
+    ]
     firstname = models.CharField('Имя', max_length=200)
     lastname = models.CharField('Фамилия', max_length=200)
     phonenumber = PhoneNumberField()
     address = models.CharField('Адрес', max_length=200)
-    status = models.CharField('Статус', max_length=200, choices=STATUSES, default=OPEN)
+    status = models.CharField(
+        'Статус',
+        max_length=200,
+        choices=STATUSES,
+        default=OPEN,
+        )
     comment = models.TextField('Комментарий', default='', blank=True)
     registrated_at = models.DateTimeField('Дата создания', default=timezone.now)
     called_at = models.DateTimeField('Дата звонка', null=True, blank=True)
     delivered_at = models.DateTimeField('Дата доставки', null=True, blank=True)
+    payment_method = models.CharField(
+        'Способ оплаты',
+        max_length=200,
+        choices=PAYMENT_METHODS,
+        default=OFFLINE,
+        )
     objects = OrderQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
-  
+
     def __str__(self):
         return f'{self.firstname} {self.lastname} {self.address}'
 
