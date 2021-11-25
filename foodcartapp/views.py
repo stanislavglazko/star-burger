@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
 
-from .models import OrderItem, Product, Order
+from .models import OrderItem, Product, Order, RestaurantMenuItem
 
 
 def banners_list_api(request):
@@ -85,20 +85,35 @@ def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
+    restaurants = set()
+    restaurant_menu_items = RestaurantMenuItem.objects.all()
+    for item in restaurant_menu_items:
+        restaurants.add(item.restaurant)
+
     order = Order.objects.create(
         firstname=serializer.validated_data['firstname'],
         lastname=serializer.validated_data['lastname'],
         phonenumber=serializer.validated_data['phonenumber'],
         address=serializer.validated_data['address'],
     )
+
     for item in serializer.validated_data['products']:
-        print(item)
+        current_restaurants = set()
+        for rm_item in restaurant_menu_items:
+            if item['product'] == rm_item.product:
+                current_restaurants.add(rm_item.restaurant)
+
         OrderItem.objects.create(
             order=order,
             product=item['product'],
             quantity=item['quantity'],
             cost=item['product'].price * item['quantity'],
         )
+
+        restaurants = restaurants & current_restaurants
+
+    order.restaurant = restaurants.pop()
+    order.save()
 
     serializer = OrderSerializer(order)
 

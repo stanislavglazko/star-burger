@@ -168,6 +168,14 @@ class Order(models.Model):
         choices=PAYMENT_METHODS,
         default=OFFLINE,
         )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.SET_NULL,
+        related_name='orders',
+        verbose_name='Ресторан',
+        null=True,
+        blank=True,
+    )
     objects = OrderQuerySet.as_manager()
 
     class Meta:
