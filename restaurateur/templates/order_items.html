@@ -37,7 +37,7 @@
         <td>{{ item.comment }}</td>
         <td>
             <ul>
-              {% for restaurant in item.restaurants_list %}
+              {% for restaurant in item.restaurant.all %}
                 <li>{{ restaurant.name }}</li>
               {% endfor %}
             </ul>

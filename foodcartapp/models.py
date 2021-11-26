@@ -172,14 +172,9 @@ class Order(models.Model):
         Restaurant,
         related_name='orders',
         verbose_name='Рестораны',
-        null=True,
         blank=True,
     )
     objects = OrderQuerySet.as_manager()
-
-    @property
-    def restaurants_list(self):
-        return self.restaurant.all()
 
     class Meta:
         verbose_name = 'Заказ'
