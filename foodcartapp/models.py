@@ -168,15 +168,18 @@ class Order(models.Model):
         choices=PAYMENT_METHODS,
         default=OFFLINE,
         )
-    restaurant = models.ForeignKey(
+    restaurant = models.ManyToManyField(
         Restaurant,
-        on_delete=models.SET_NULL,
         related_name='orders',
-        verbose_name='Ресторан',
+        verbose_name='Рестораны',
         null=True,
         blank=True,
     )
     objects = OrderQuerySet.as_manager()
+
+    @property
+    def restaurants_list(self):
+        return self.restaurant.all()
 
     class Meta:
         verbose_name = 'Заказ'
