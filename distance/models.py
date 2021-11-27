@@ -1,0 +1,14 @@
+from django.db import models
+from django.db.models.fields import DateField, FloatField
+
+
+class PlaceCoords(models.Model):
+    address = models.CharField(
+        'адрес места',
+        unique=True,
+        max_length=100,
+        blank=True,
+    )
+    date_of_calculate_coords = models.DateTimeField(null=True, blank=True)
+    lon = FloatField('Долгота')
+    lat = FloatField('Широта')

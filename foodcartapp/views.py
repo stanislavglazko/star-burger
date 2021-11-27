@@ -1,14 +1,17 @@
+import math
+
+from geopy import distance as geopy_distance
+
 from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
 
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 
-
+from restaurateur.views import get_coords
 from .models import OrderItem, Product, Order, RestaurantMenuItem
 
 
@@ -79,6 +82,21 @@ class OrderSerializer(ModelSerializer):
         fields = ['id', 'products', 'firstname', 'lastname', 'phonenumber', 'address']
 
 
+def find_nearest_restaurant(restaurants, order_address):
+    restaurant = ''
+    order_address_lon, order_address_lat = get_coords(order_address)
+    min_distance = math.inf
+    for r in restaurants:
+        restaurant_lon, restaurant_lat = get_coords(r.address)
+        current_distance = round(geopy_distance.distance(
+                (order_address_lat,  order_address_lon),
+                (restaurant_lat, restaurant_lon)).km)
+        if current_distance < min_distance:
+            restaurant = r
+            min_distance = current_distance
+    return restaurant
+
+
 @transaction.atomic
 @api_view(['POST'])
 def register_order(request):
@@ -113,7 +131,7 @@ def register_order(request):
         restaurants = restaurants & current_restaurants
 
     order.available_restaurants.add(*restaurants)
-    order.restaurant = restaurants.pop()
+    order.restaurant = find_nearest_restaurant(restaurants, order.address)
     order.save()
 
     serializer = OrderSerializer(order)

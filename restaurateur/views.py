@@ -1,11 +1,12 @@
 import requests
 
-from geopy import distance
+from geopy import distance as geopy_distance
 
 from django import forms
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.contrib.auth.decorators import user_passes_test
 
 from django.contrib.auth import authenticate, login
@@ -13,6 +14,8 @@ from django.contrib.auth import views as auth_views
 
 
 from foodcartapp.models import Order, Product, Restaurant
+from distance.models import PlaceCoords
+
 
 APIKEY = '3cea8beb-5193-4a5b-a8a6-34a2e6c7df2c'
 
@@ -119,18 +122,32 @@ def fetch_coordinates(apikey, address):
     return lon, lat
 
 
+def get_coords(place_address):
+    try:
+        order_coords = PlaceCoords.objects.get(address=place_address)
+        return order_coords.lon, order_coords.lat
+    except PlaceCoords.DoesNotExist:
+        address_lon, address_lat = fetch_coordinates(APIKEY, place_address)
+        PlaceCoords.objects.create(
+            address=place_address,
+            date_of_calculate_coords=timezone.now(),
+            lon=address_lon,
+            lat=address_lat,
+            )
+        return address_lon, address_lat
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.get_cost()
+    orders = Order.objects.get_cost().prefetch_related('available_restaurants')
     for order in orders:
         order.restaurants_and_distance = []
-        order_address_lon, order_address_lat = fetch_coordinates(APIKEY, order.address)
-
+        order_address_lon, order_address_lat = get_coords(order.address)
         for restaurant in order.available_restaurants.all():
-            restaurnat_lon, restaurant_lat = fetch_coordinates(APIKEY, restaurant.address)
-            distance_between_order_and_restaurant = round(distance.distance(
+            restaurant_lon, restaurant_lat = get_coords(restaurant.address)
+            distance_between_order_and_restaurant = round(geopy_distance.distance(
                 (order_address_lat,  order_address_lon),
-                (restaurant_lat, restaurnat_lon)).km)
+                (restaurant_lat, restaurant_lon)).km)
             order.restaurants_and_distance.append((restaurant.name, distance_between_order_and_restaurant))
         order.restaurants_and_distance = sorted(order.restaurants_and_distance, key=lambda x: x[1])
 
