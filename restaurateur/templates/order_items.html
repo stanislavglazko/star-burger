@@ -37,8 +37,8 @@
         <td>{{ item.comment }}</td>
         <td>
             <ul>
-              {% for restaurant in item.restaurant.all %}
-                <li>{{ restaurant.name }}</li>
+              {% for restaurant in item.restaurants_and_distance %}
+                <li>{{ restaurant.0 }} - {{ restaurant.1 }} км</li>
               {% endfor %}
             </ul>
         </td>

@@ -168,12 +168,20 @@ class Order(models.Model):
         choices=PAYMENT_METHODS,
         default=OFFLINE,
         )
-    restaurant = models.ManyToManyField(
+    available_restaurants = models.ManyToManyField(
         Restaurant,
-        related_name='orders',
-        verbose_name='Рестораны',
+        verbose_name='Доступные рестораны',
         blank=True,
     )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.SET_NULL,
+        related_name='orders',
+        verbose_name='Выбранный ресторан',
+        null=True,
+        blank=True,
+    )
+
     objects = OrderQuerySet.as_manager()
 
     class Meta:
