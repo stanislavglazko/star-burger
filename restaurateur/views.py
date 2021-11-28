@@ -1,5 +1,6 @@
 import requests
 
+from environs import Env
 from geopy import distance as geopy_distance
 
 from django import forms
@@ -17,7 +18,11 @@ from foodcartapp.models import Order, Product, Restaurant
 from distance.models import PlaceCoords
 
 
-APIKEY = '3cea8beb-5193-4a5b-a8a6-34a2e6c7df2c'
+env = Env()
+env.read_env()
+
+
+APIKEY = env('APIKEY')
 
 
 class Login(forms.Form):
@@ -124,17 +129,20 @@ def fetch_coordinates(apikey, address):
 
 def get_coords(place_address):
     try:
-        order_coords = PlaceCoords.objects.get(address=place_address)
-        return order_coords.lon, order_coords.lat
+        place_coords = PlaceCoords.objects.get(address=place_address)
+        return place_coords.lon, place_coords.lat
     except PlaceCoords.DoesNotExist:
-        address_lon, address_lat = fetch_coordinates(APIKEY, place_address)
+        place_address_lon, place_address_lat = fetch_coordinates(
+            APIKEY,
+            place_address,
+            )
         PlaceCoords.objects.create(
             address=place_address,
             date_of_calculate_coords=timezone.now(),
-            lon=address_lon,
-            lat=address_lat,
+            lon=place_address_lon,
+            lat=place_address_lat,
             )
-        return address_lon, address_lat
+        return place_address_lon, place_address_lat
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')

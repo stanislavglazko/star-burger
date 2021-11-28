@@ -159,7 +159,10 @@ class Order(models.Model):
         default=OPEN,
         )
     comment = models.TextField('Комментарий', default='', blank=True)
-    registrated_at = models.DateTimeField('Дата создания', default=timezone.now)
+    registrated_at = models.DateTimeField(
+        'Дата создания',
+        default=timezone.now,
+        )
     called_at = models.DateTimeField('Дата звонка', null=True, blank=True)
     delivered_at = models.DateTimeField('Дата доставки', null=True, blank=True)
     payment_method = models.CharField(

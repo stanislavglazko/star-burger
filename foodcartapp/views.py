@@ -82,6 +82,14 @@ class OrderSerializer(ModelSerializer):
         fields = ['id', 'products', 'firstname', 'lastname', 'phonenumber', 'address']
 
 
+def get_restaraunts():
+    restaurants = set()
+    restaurant_menu_items = RestaurantMenuItem.objects.all()
+    for item in restaurant_menu_items:
+        restaurants.add(item.restaurant)
+    return restaurants, restaurant_menu_items
+
+
 def find_nearest_restaurant(restaurants, order_address):
     restaurant = ''
     order_address_lon, order_address_lat = get_coords(order_address)
@@ -103,10 +111,7 @@ def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
-    restaurants = set()
-    restaurant_menu_items = RestaurantMenuItem.objects.all()
-    for item in restaurant_menu_items:
-        restaurants.add(item.restaurant)
+    restaurants, restaurant_menu_items = get_restaraunts()
 
     order = Order.objects.create(
         firstname=serializer.validated_data['firstname'],
