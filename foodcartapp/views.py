@@ -90,21 +90,6 @@ def get_restaraunts():
     return restaurants, restaurant_menu_items
 
 
-def find_nearest_restaurant(restaurants, order_address):
-    restaurant = ''
-    order_address_lon, order_address_lat = get_coords(order_address)
-    min_distance = math.inf
-    for r in restaurants:
-        restaurant_lon, restaurant_lat = get_coords(r.address)
-        current_distance = round(geopy_distance.distance(
-                (order_address_lat,  order_address_lon),
-                (restaurant_lat, restaurant_lon)).km)
-        if current_distance < min_distance:
-            restaurant = r
-            min_distance = current_distance
-    return restaurant
-
-
 @transaction.atomic
 @api_view(['POST'])
 def register_order(request):
@@ -136,7 +121,7 @@ def register_order(request):
         restaurants = restaurants & current_restaurants
 
     order.available_restaurants.add(*restaurants)
-    order.restaurant = find_nearest_restaurant(restaurants, order.address)
+    order.restaurant = restaurants.pop()
     order.save()
 
     serializer = OrderSerializer(order)
