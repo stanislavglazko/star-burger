@@ -107,9 +107,9 @@ def register_order(request):
 
     for product in serializer.validated_data['products']:
         current_restaurants = set()
-        for rm_item in restaurant_menu_items:
-            if product['product'] == rm_item.product:
-                current_restaurants.add(rm_item.restaurant)
+        for restaurant_menu_item in restaurant_menu_items:
+            if product['product'] == restaurant_menu_item.product:
+                current_restaurants.add(restaurant_menu_item.restaurant)
 
         OrderItem.objects.create(
             order=order,
