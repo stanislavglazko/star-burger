@@ -144,9 +144,11 @@ class Order(models.Model):
     ]
     OFFLINE = 'OFFLINE'
     ONLINE = 'ONLINE'
+    UNDEFINED = 'UNDEFINED'
     PAYMENT_METHODS = [
         (OFFLINE, 'Наличными'),
         (ONLINE,  'Онлайн'),
+        (UNDEFINED, 'Нужно уточнить'),
     ]
     firstname = models.CharField('Имя', max_length=200)
     lastname = models.CharField('Фамилия', max_length=200)
@@ -169,7 +171,7 @@ class Order(models.Model):
         'Способ оплаты',
         max_length=20,
         choices=PAYMENT_METHODS,
-        default=OFFLINE,
+        default=UNDEFINED,
         )
     available_restaurants = models.ManyToManyField(
         Restaurant,
