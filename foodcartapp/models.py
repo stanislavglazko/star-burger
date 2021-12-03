@@ -158,7 +158,7 @@ class Order(models.Model):
         choices=STATUSES,
         default=OPEN,
         )
-    comment = models.TextField('Комментарий', default='', blank=True)
+    comment = models.TextField('Комментарий', blank=True)
     registrated_at = models.DateTimeField(
         'Дата создания',
         default=timezone.now,
