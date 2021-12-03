@@ -152,26 +152,39 @@ class Order(models.Model):
     ]
     firstname = models.CharField('Имя', max_length=200)
     lastname = models.CharField('Фамилия', max_length=200)
-    phonenumber = PhoneNumberField('Номер телефона')
+    phonenumber = PhoneNumberField('Номер телефона', db_index=True)
     address = models.CharField('Адрес', max_length=200)
     status = models.CharField(
         'Статус',
         max_length=20,
         choices=STATUSES,
         default=OPEN,
+        db_index=True,
         )
     comment = models.TextField('Комментарий', blank=True)
     registrated_at = models.DateTimeField(
         'Дата создания',
         default=timezone.now,
+        db_index=True,
         )
-    called_at = models.DateTimeField('Дата звонка', null=True, blank=True)
-    delivered_at = models.DateTimeField('Дата доставки', null=True, blank=True)
+    called_at = models.DateTimeField(
+        'Дата звонка',
+        null=True,
+        blank=True,
+        db_index=True,
+        )
+    delivered_at = models.DateTimeField(
+        'Дата доставки',
+        null=True,
+        blank=True,
+        db_index=True,
+        )
     payment_method = models.CharField(
         'Способ оплаты',
         max_length=20,
         choices=PAYMENT_METHODS,
         default=UNDEFINED,
+        db_index=True,
         )
     available_restaurants = models.ManyToManyField(
         Restaurant,
