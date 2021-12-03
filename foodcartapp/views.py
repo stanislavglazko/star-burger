@@ -82,21 +82,11 @@ class OrderSerializer(ModelSerializer):
         fields = ['id', 'products', 'firstname', 'lastname', 'phonenumber', 'address']
 
 
-def get_restaraunts():
-    restaurants = set()
-    restaurant_menu_items = RestaurantMenuItem.objects.all()
-    for item in restaurant_menu_items:
-        restaurants.add(item.restaurant)
-    return restaurants, restaurant_menu_items
-
-
 @transaction.atomic
 @api_view(['POST'])
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-
-    restaurants, restaurant_menu_items = get_restaraunts()
 
     order = Order.objects.create(
         firstname=serializer.validated_data['firstname'],
@@ -106,11 +96,6 @@ def register_order(request):
     )
 
     for product in serializer.validated_data['products']:
-        current_restaurants = set()
-        for restaurant_menu_item in restaurant_menu_items:
-            if product['product'] == restaurant_menu_item.product:
-                current_restaurants.add(restaurant_menu_item.restaurant)
-
         OrderItem.objects.create(
             order=order,
             product=product['product'],
@@ -118,8 +103,7 @@ def register_order(request):
             cost=product['product'].price * product['quantity'],
         )
 
-        restaurants = restaurants & current_restaurants
-
+    restaurants = RestaurantMenuItem.objects.get_restaurants(serializer.validated_data['products'])
     order.available_restaurants.add(*restaurants)
     order.restaurant = restaurants.pop()
     order.save()
