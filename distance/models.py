@@ -7,7 +7,6 @@ class PlaceCoords(models.Model):
         'Адрес места',
         unique=True,
         max_length=100,
-        blank=True,
     )
     date_of_calculate_coords = models.DateTimeField(
         'Дата получения координат места',
