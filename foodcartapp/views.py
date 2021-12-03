@@ -105,17 +105,17 @@ def register_order(request):
         address=serializer.validated_data['address'],
     )
 
-    for item in serializer.validated_data['products']:
+    for product in serializer.validated_data['products']:
         current_restaurants = set()
         for rm_item in restaurant_menu_items:
-            if item['product'] == rm_item.product:
+            if product['product'] == rm_item.product:
                 current_restaurants.add(rm_item.restaurant)
 
         OrderItem.objects.create(
             order=order,
-            product=item['product'],
-            quantity=item['quantity'],
-            cost=item['product'].price * item['quantity'],
+            product=product['product'],
+            quantity=product['quantity'],
+            cost=product['product'].price * product['quantity'],
         )
 
         restaurants = restaurants & current_restaurants
