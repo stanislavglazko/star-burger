@@ -13,5 +13,5 @@ class PlaceCoords(models.Model):
         null=True,
         blank=True,
         )
-    lon = FloatField('Долгота')
-    lat = FloatField('Широта')
+    lon = FloatField('Долгота', null=True, blank=True)
+    lat = FloatField('Широта', null=True, blank=True)
