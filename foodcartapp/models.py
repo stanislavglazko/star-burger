@@ -154,7 +154,7 @@ class Order(models.Model):
     address = models.CharField('Адрес', max_length=200)
     status = models.CharField(
         'Статус',
-        max_length=200,
+        max_length=20,
         choices=STATUSES,
         default=OPEN,
         )
@@ -167,7 +167,7 @@ class Order(models.Model):
     delivered_at = models.DateTimeField('Дата доставки', null=True, blank=True)
     payment_method = models.CharField(
         'Способ оплаты',
-        max_length=200,
+        max_length=20,
         choices=PAYMENT_METHODS,
         default=OFFLINE,
         )
