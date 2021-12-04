@@ -1,6 +1,5 @@
 import requests
 
-from environs import Env
 from geopy import distance as geopy_distance
 
 from django import forms
@@ -17,12 +16,7 @@ from django.contrib.auth import views as auth_views
 from foodcartapp.models import Order, Product, Restaurant
 from distance.models import PlaceCoords
 
-
-env = Env()
-env.read_env()
-
-
-APIKEY = env('APIKEY')
+from star_burger.settings import APIKEY
 
 
 class Login(forms.Form):
