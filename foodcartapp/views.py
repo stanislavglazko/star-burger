@@ -40,7 +40,10 @@ def banners_list_api(request):
 
 
 def product_list_api(request):
-    products = Product.objects.select_related('category').available()
+    products = []
+    for product in Product.objects.all().select_related('category'):
+        if product.menu_items:
+            products.append(product)
 
     dumped_products = []
     for product in products:
