@@ -5,7 +5,8 @@ from django.db import migrations
 
 def calculate_orders_cost(apps, schema_editor):
     OrderItem = apps.get_model('foodcartapp', 'OrderItem')
-    for order_item in OrderItem.objects.all():
+    order_items = OrderItem.objects.all()
+    for order_item in order_items.iterator():
         if not order_item.cost:
             order_item.cost = order_item.product.price * order_item.cost
             order_item.save()
