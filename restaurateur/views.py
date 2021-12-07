@@ -1,3 +1,4 @@
+import math
 import requests
 
 from geopy import distance as geopy_distance
@@ -144,12 +145,21 @@ def view_orders(request):
     orders = Order.objects.get_cost().prefetch_related('available_restaurants')
     for order in orders:
         order.restaurants_and_distance = []
-        order_address_lon, order_address_lat = get_coords(order.address)
+        try:
+            order_address_lon, order_address_lat = get_coords(order.address)
+        except TypeError:
+            order_address_lon, order_address_lat = None, None
         for restaurant in order.available_restaurants.all():
-            restaurant_lon, restaurant_lat = get_coords(restaurant.address)
-            distance_between_order_and_restaurant = round(geopy_distance.distance(
-                (order_address_lat,  order_address_lon),
-                (restaurant_lat, restaurant_lon)).km)
+            try:
+                restaurant_lon, restaurant_lat = get_coords(restaurant.address)
+            except TypeError:
+                restaurant_lon, restaurant_lat = None, None
+            if order_address_lon and order_address_lat and restaurant_lon and restaurant_lat:
+                distance_between_order_and_restaurant = round(geopy_distance.distance(
+                    (order_address_lat,  order_address_lon),
+                    (restaurant_lat, restaurant_lon)).km)
+            else:
+                distance_between_order_and_restaurant = math.inf
             order.restaurants_and_distance.append((restaurant.name, distance_between_order_and_restaurant))
         order.restaurants_and_distance = sorted(order.restaurants_and_distance, key=lambda x: x[1])
 
