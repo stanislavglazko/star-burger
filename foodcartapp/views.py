@@ -95,13 +95,16 @@ def register_order(request):
         address=serializer.validated_data['address'],
     )
 
+    order_items = []
     for product in serializer.validated_data['products']:
-        OrderItem.objects.create(
-            order=order,
-            product=product['product'],
-            quantity=product['quantity'],
-            cost=product['product'].price * product['quantity'],
-        )
+        order_item = OrderItem()
+        order_item.order = order
+        order_item.product = product['product']
+        order_item.quantity = product['quantity']
+        order_item.cost = product['product'].price * product['quantity']
+        order_items.append(order_item)
+
+    OrderItem.objects.bulk_create(order_items)
 
     restaurants = RestaurantMenuItem.objects.get_restaurants_for_order(serializer.validated_data['products'])
     order.available_restaurants.add(*restaurants)
