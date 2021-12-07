@@ -99,7 +99,7 @@ class Product(models.Model):
 
 class RestaurantMenuItemQuerySet(models.QuerySet):
 
-    def get_restaurants(self, products):
+    def get_restaurants_for_order(self, products):
         restaurants = set()
         restaurant_menu_items = RestaurantMenuItem.objects.all()
         for item in restaurant_menu_items:

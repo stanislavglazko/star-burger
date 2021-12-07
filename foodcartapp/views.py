@@ -103,7 +103,7 @@ def register_order(request):
             cost=product['product'].price * product['quantity'],
         )
 
-    restaurants = RestaurantMenuItem.objects.get_restaurants(serializer.validated_data['products'])
+    restaurants = RestaurantMenuItem.objects.get_restaurants_for_order(serializer.validated_data['products'])
     order.available_restaurants.add(*restaurants)
     order.restaurant = restaurants.pop()
     order.save()
