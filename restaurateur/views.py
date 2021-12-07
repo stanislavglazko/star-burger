@@ -16,7 +16,7 @@ from django.contrib.auth import views as auth_views
 from foodcartapp.models import Order, Product, Restaurant
 from distance.models import PlaceCoords
 
-from star_burger.settings import APIKEY
+from star_burger.settings import YANDEX_APIKEY
 
 
 class Login(forms.Form):
@@ -127,7 +127,7 @@ def get_coords(place_address):
         return place_coords.lon, place_coords.lat
     except PlaceCoords.DoesNotExist:
         place_address_lon, place_address_lat = fetch_coordinates(
-            APIKEY,
+            YANDEX_APIKEY,
             place_address,
             )
         PlaceCoords.objects.create(
