@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.fields import FloatField
+from django.utils import timezone
 
 
 class PlaceCoords(models.Model):
@@ -10,8 +11,7 @@ class PlaceCoords(models.Model):
     )
     date_of_calculate_coords = models.DateTimeField(
         'Дата получения координат места',
-        null=True,
-        blank=True,
+        auto_now=True,
         )
     lon = FloatField('Долгота', null=True, blank=True)
     lat = FloatField('Широта', null=True, blank=True)
