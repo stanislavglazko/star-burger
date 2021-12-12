@@ -100,11 +100,13 @@ def register_order(request):
 
     order_items = []
     for product in serializer.validated_data['products']:
-        order_item = OrderItem()
-        order_item.order = order
-        order_item.product = product['product']
-        order_item.quantity = product['quantity']
-        order_item.cost = product['product'].price * product['quantity']
+        order_item_data = {
+            'order': order,
+            'product': product['product'],
+            'quantity': product['quantity'],
+            'cost': product['product'].price * product['quantity'],
+        }
+        order_item = OrderItem(**order_item_data)
         order_items.append(order_item)
 
     OrderItem.objects.bulk_create(order_items)
