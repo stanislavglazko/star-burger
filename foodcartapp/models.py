@@ -97,22 +97,6 @@ class Product(models.Model):
         return self.name
 
 
-class RestaurantMenuItemQuerySet(models.QuerySet):
-
-    def get_restaurants_for_order(self, products):
-        restaurants = set()
-        restaurant_menu_items = RestaurantMenuItem.objects.all()
-        for item in restaurant_menu_items:
-            restaurants.add(item.restaurant)
-        for product in products:
-            current_restaurants = set()
-            for restaurant_menu_item in restaurant_menu_items:
-                if product['product'] == restaurant_menu_item.product:
-                    current_restaurants.add(restaurant_menu_item.restaurant)
-            restaurants = restaurants & current_restaurants
-        return restaurants
-
-
 class RestaurantMenuItem(models.Model):
     restaurant = models.ForeignKey(
         Restaurant,
@@ -131,7 +115,6 @@ class RestaurantMenuItem(models.Model):
         default=True,
         db_index=True
     )
-    objects = RestaurantMenuItemQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'пункт меню ресторана'
@@ -149,6 +132,19 @@ class OrderQuerySet(models.QuerySet):
     def with_cost(self):
         cost_of_order = self.filter(status='OPEN').annotate(cost_of_order=Sum(F('products__cost')))
         return cost_of_order
+
+    def get_restaurants_for_order(self, order):
+        restaurants = set()
+        restaurant_menu_items = RestaurantMenuItem.objects.all()
+        for item in restaurant_menu_items:
+            restaurants.add(item.restaurant)
+        for product in order.products.all():
+            current_restaurants = set()
+            for restaurant_menu_item in restaurant_menu_items:
+                if product.product == restaurant_menu_item.product:
+                    current_restaurants.add(restaurant_menu_item.restaurant)
+            restaurants = restaurants & current_restaurants
+        return restaurants
 
 
 class Order(models.Model):

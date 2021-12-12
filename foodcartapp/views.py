@@ -111,7 +111,7 @@ def register_order(request):
 
     OrderItem.objects.bulk_create(order_items)
 
-    restaurants = RestaurantMenuItem.objects.get_restaurants_for_order(serializer.validated_data['products'])
+    restaurants = Order.objects.get_restaurants_for_order(order)
     order.available_restaurants.add(*restaurants)
     order.restaurant = restaurants.pop()
     order.save()
