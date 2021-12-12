@@ -142,7 +142,7 @@ def get_coords(place_address):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.get_cost().prefetch_related('available_restaurants')
+    orders = Order.objects.with_cost().prefetch_related('available_restaurants')
     for order in orders:
         order.restaurants_and_distance = []
         try:
