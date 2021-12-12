@@ -1,4 +1,3 @@
-import math
 import requests
 
 from geopy import distance as geopy_distance
@@ -18,6 +17,10 @@ from foodcartapp.models import Order, Product, Restaurant
 from distance.models import PlaceCoords
 
 from star_burger.settings import YANDEX_APIKEY
+
+
+class GetCoordsError(TypeError):
+    pass
 
 
 class Login(forms.Form):
@@ -115,7 +118,7 @@ def fetch_coordinates(apikey, address):
     found_places = response.json()['response']['GeoObjectCollection']['featureMember']
 
     if not found_places:
-        return None
+        raise GetCoordsError('Некорректный адрес')
 
     most_relevant = found_places[0]
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
@@ -127,17 +130,20 @@ def get_coords(place_address):
         place_coords = PlaceCoords.objects.get(address=place_address)
         return place_coords.lon, place_coords.lat
     except PlaceCoords.DoesNotExist:
-        place_address_lon, place_address_lat = fetch_coordinates(
-            YANDEX_APIKEY,
-            place_address,
-            )
-        PlaceCoords.objects.create(
-            address=place_address,
-            date_of_calculate_coords=timezone.now(),
-            lon=place_address_lon,
-            lat=place_address_lat,
-            )
-        return place_address_lon, place_address_lat
+        try:
+            place_address_lon, place_address_lat = fetch_coordinates(
+                YANDEX_APIKEY,
+                place_address,
+                )
+            PlaceCoords.objects.create(
+                address=place_address,
+                date_of_calculate_coords=timezone.now(),
+                lon=place_address_lon,
+                lat=place_address_lat,
+                )
+            return place_address_lon, place_address_lat
+        except GetCoordsError:
+            return None, None
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
@@ -145,21 +151,18 @@ def view_orders(request):
     orders = Order.objects.with_cost().prefetch_related('available_restaurants')
     for order in orders:
         order.restaurants_and_distance = []
-        try:
-            order_address_lon, order_address_lat = get_coords(order.address)
-        except TypeError:
-            order_address_lon, order_address_lat = None, None
+        order_address_lon, order_address_lat = get_coords(order.address)
+
         for restaurant in order.available_restaurants.all():
-            try:
-                restaurant_lon, restaurant_lat = get_coords(restaurant.address)
-            except TypeError:
-                restaurant_lon, restaurant_lat = None, None
+            restaurant_lon, restaurant_lat = get_coords(restaurant.address)
             if order_address_lon and order_address_lat and restaurant_lon and restaurant_lat:
                 distance_between_order_and_restaurant = round(geopy_distance.distance(
                     (order_address_lat,  order_address_lon),
                     (restaurant_lat, restaurant_lon)).km)
+            elif not restaurant_lon or not restaurant_lat:
+                distance_between_order_and_restaurant = 'Проверить адрес ресторана!'
             else:
-                distance_between_order_and_restaurant = math.inf
+                distance_between_order_and_restaurant = 'Проверить адрес заказа!'
             order.restaurants_and_distance.append((restaurant.name, distance_between_order_and_restaurant))
         order.restaurants_and_distance = sorted(order.restaurants_and_distance, key=lambda x: x[1])
 
