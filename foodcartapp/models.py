@@ -133,12 +133,12 @@ class OrderQuerySet(models.QuerySet):
         cost_of_order = self.filter(status='OPEN').annotate(cost_of_order=Sum(F('products__cost')))
         return cost_of_order
 
-    def get_restaurants_for_order(self, order):
+    def get_restaurants_for_order(self):
         restaurants = set()
         restaurant_menu_items = RestaurantMenuItem.objects.all()
         for item in restaurant_menu_items:
             restaurants.add(item.restaurant)
-        for product in order.products.all():
+        for product in self[0].products.all():
             current_restaurants = set()
             for restaurant_menu_item in restaurant_menu_items:
                 if product.product == restaurant_menu_item.product:
