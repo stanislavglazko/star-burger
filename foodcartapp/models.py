@@ -138,12 +138,13 @@ class OrderQuerySet(models.QuerySet):
         restaurant_menu_items = RestaurantMenuItem.objects.all()
         for item in restaurant_menu_items:
             restaurants.add(item.restaurant)
-        for product in self[0].products.all():
-            current_restaurants = set()
-            for restaurant_menu_item in restaurant_menu_items:
-                if product.product == restaurant_menu_item.product:
-                    current_restaurants.add(restaurant_menu_item.restaurant)
-            restaurants = restaurants & current_restaurants
+        for order in self:
+            for product in order.products.all():
+                current_restaurants = set()
+                for restaurant_menu_item in restaurant_menu_items:
+                    if product.product == restaurant_menu_item.product:
+                        current_restaurants.add(restaurant_menu_item.restaurant)
+                restaurants = restaurants & current_restaurants
         return restaurants
 
 
