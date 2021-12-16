@@ -113,7 +113,6 @@ def register_order(request):
 
     restaurants = Order.objects.get_restaurants_for_order(order)
     order.available_restaurants.add(*restaurants)
-    order.restaurant = restaurants.pop()
     order.save()
 
     serializer = OrderSerializer(order)
