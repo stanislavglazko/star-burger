@@ -110,8 +110,7 @@ def register_order(request):
         order_items.append(order_item)
 
     OrderItem.objects.bulk_create(order_items)
-
-    restaurants = Order.objects.filter(id=order.id).get_restaurants_for_order()
+    restaurants = Order.objects.filter(id=order.id).get_restaurants_for_order()[0].restaurants
     order.available_restaurants.add(*restaurants)
     order.save()
 

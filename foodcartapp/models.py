@@ -134,18 +134,20 @@ class OrderQuerySet(models.QuerySet):
         return cost_of_order
 
     def get_restaurants_for_order(self):
-        restaurants = set()
         restaurant_menu_items = RestaurantMenuItem.objects.all()
+        all_restaurants = set()
         for item in restaurant_menu_items:
-            restaurants.add(item.restaurant)
+            all_restaurants.add(item.restaurant)
         for order in self:
+            order_restaurants = all_restaurants
             for product in order.products.all():
                 current_restaurants = set()
                 for restaurant_menu_item in restaurant_menu_items:
                     if product.product == restaurant_menu_item.product:
                         current_restaurants.add(restaurant_menu_item.restaurant)
-                restaurants = restaurants & current_restaurants
-        return restaurants
+                order_restaurants = order_restaurants & current_restaurants
+            order.restaurants = order_restaurants
+        return self
 
 
 class Order(models.Model):
